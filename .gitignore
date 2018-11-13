@@ -1,0 +1,6 @@
+#ignore everything in any folder named .idea
+.idea/
+bin/
+.classpath
+.project
+cs157aAcademicDB.iml
