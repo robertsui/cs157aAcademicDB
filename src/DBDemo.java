@@ -42,13 +42,13 @@ public class DBDemo {
     private final String userName = "root";
 
     /** The password for the MySQL account (or empty for anonymous) */
-    private final String password = "password";
+    private final String password = "myroot";
 
     /** The name of the computer running MySQL */
     private final String serverName = "localhost";
 
     /** The port of the MySQL server (default is 3306) */
-    private final int portNumber = 3306;
+    private final int portNumber = 3308;
 
     /** The name of the database we are testing with (this default is installed with MySQL) */
     private final String dbName = "test";
