@@ -1,0 +1,5 @@
+1000	Computer Science	CS
+1001	Mathematics	MATH
+1002	Biology	BIOL
+1003	Physics	PHYS
+1004	Chemistry	CHEM

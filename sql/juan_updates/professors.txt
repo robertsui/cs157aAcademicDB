@@ -1,0 +1,20 @@
+0001	Sebastian	Glockner	1000	Professor	1995
+0002	Catherine	Jones	1000	Professor	2008
+0003	Gerard	Fugate	1000	Associate Professor	2010
+0004	Sarah	Marrero	1000	Assistant Professor	2002
+0005	Joshua	Dodson	1000	Lecturer	2013
+0006	Tao	Chen	1000	Lecturer	2010
+0007	Wang	Liang	1001	Professor	1998
+0008	Annika	Nodland	1001	Assistant Professor	2009
+0009	Jacob	Tran	1001	Lecturer	2016
+0010	Tom	Luckett	1001	Lecturer	2012
+0011	Michael	Parrish	1002	Associate Professor	2011
+0012	Brian	Gutierrez	1002	Professor	2007
+0013	Francisca	Offermans	1002	Professor	1996
+0014	Adam	Hall	1003	Lecturer	2016
+0015	Lillian	Horton	1003	Assistant Professor	2013
+0016	Taysir	Sarkis	1003	Lecturer	2014
+0017	Lydia	Graham	1004	Professor	2002
+0018	Drew	King	1004	Professor	2005
+0019	Myla	Stevenson	1004	Assistant Professor	2011
+0020	Benjamin	Kreitmayer	1004	Lecturer	2012

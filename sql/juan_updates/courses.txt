@@ -1,0 +1,17 @@
+10460	1000	046A	Introduction to Programming
+10461	1000	046B	Introduction to Data Structures
+11460	1000	146	Data Structures and Algorithms
+11470	1000	147	Computer Architecture
+11490	1000	149	Operating Systems
+11570	1000	157A	Introduction to Database Management Systems
+20300	1001	030	Calculus I
+20310	1001	031	Calculus II
+20320	1001	032	Calculus III
+20420	1001	042	Discrete Mathematics
+30300	1002	030	Principles of Biology I
+30310	1002	031	Principles of Biology II
+40020	1003	002A	Fundamentals of Physics I
+40021	1003	002B	Fundamentals of Physics II
+40500	1003	050	General Physics - Mechanics
+50300	1004	030A	Introductory Chemistry I
+50301	1004	030B	Introductory Chemistry II
