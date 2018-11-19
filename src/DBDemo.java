@@ -105,36 +105,11 @@ public class DBDemo {
 		try {
 			conn = this.getConnection();
 			System.out.println("Connected to database");
+			viewCourses(conn);
 		} catch (SQLException e) {
-			System.out.println("ERROR: Could not connect to the database");
+//			System.out.println("ERROR: Could not connect to the database");
 			e.printStackTrace();
-			return;
-		}
-		
-		// View course offerings
-		try {
-			String viewCourses = 
-					"SELECT d.name AS department, d.abbreviation, c.courseNo, c.courseName " + 
-					"FROM Course c, Department d " + 
-					"WHERE c.deptID=d.deptID " + 
-					"ORDER BY d.name, c.courseNo ASC";
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(viewCourses);
-			// TODO: make result format pretty
-			System.out.println("Department \t\t Course Number \t\t Course Name");
-
-			while(rs.next()) {
-				String dept = rs.getString("department");
-				String abb = rs.getString("abbreviation");
-				String courseNo = rs.getString("courseNo");
-				String courseName = rs.getString("courseName");
-				
-				System.out.println(dept + "\t\t" + abb + " " + courseNo + "\t\t" + courseName);
-			}
-			rs.close();
-		} catch(SQLException e) {
-			System.out.println("ERROR: Could not view courses");
-			e.printStackTrace();
+//			return;
 		} finally {
 			try {
 				if (conn != null) {
@@ -174,6 +149,33 @@ public class DBDemo {
 //			e.printStackTrace();
 //			return;
 //		}
+	}
+	
+	private static void viewCourses(Connection conn) {
+		try {
+			String viewCourses = 
+					"SELECT d.name AS department, d.abbreviation, c.courseNo, c.courseName " + 
+					"FROM Course c, Department d " + 
+					"WHERE c.deptID=d.deptID " + 
+					"ORDER BY d.name, c.courseNo ASC";
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(viewCourses);
+			// TODO: make result format pretty
+			System.out.println("Department \t\t Course Number \t\t Course Name");
+
+			while(rs.next()) {
+				String dept = rs.getString("department");
+				String abb = rs.getString("abbreviation");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+				
+				System.out.println(dept + "\t\t" + abb + " " + courseNo + "\t\t" + courseName);
+			}
+			rs.close();
+		} catch(SQLException e) {
+			System.out.println("ERROR: Could not view courses");
+			e.printStackTrace();
+		}
 	}
 	
 	/**
