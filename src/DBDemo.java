@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -106,6 +107,8 @@ public class DBDemo {
 			conn = this.getConnection();
 			System.out.println("Connected to database");
 			viewCourses(conn);
+			System.out.println("-------------------------------------------------------");
+			checkGrades(conn, 100017);
 		} catch (SQLException e) {
 //			System.out.println("ERROR: Could not connect to the database");
 			e.printStackTrace();
@@ -119,36 +122,6 @@ public class DBDemo {
 				e.printStackTrace();
 			}
 		}
-
-		// Create a table
-//		try {
-//		    String createString =
-//			        "CREATE TABLE " + this.tableName + " ( " +
-//			        "ID INTEGER NOT NULL, " +
-//			        "NAME varchar(40) NOT NULL, " +
-//			        "STREET varchar(40) NOT NULL, " +
-//			        "CITY varchar(20) NOT NULL, " +
-//			        "STATE char(2) NOT NULL, " +
-//			        "ZIP char(5), " +
-//			        "PRIMARY KEY (ID))";
-//			this.executeUpdate(conn, createString);
-//			System.out.println("Created a table");
-//	    } catch (SQLException e) {
-//			System.out.println("ERROR: Could not create the table");
-//			e.printStackTrace();
-//			return;
-//		}
-		
-		// Drop the table
-//		try {
-//		    String dropString = "DROP TABLE " + this.tableName;
-//			this.executeUpdate(conn, dropString);
-//			System.out.println("Dropped the table");
-//	    } catch (SQLException e) {
-//			System.out.println("ERROR: Could not drop the table");
-//			e.printStackTrace();
-//			return;
-//		}
 	}
 	
 	private static void viewCourses(Connection conn) {
@@ -160,9 +133,9 @@ public class DBDemo {
 					"ORDER BY d.name, c.courseNo ASC";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(viewCourses);
+			
 			// TODO: make result format pretty
 			System.out.println("Department \t\t Course Number \t\t Course Name");
-
 			while(rs.next()) {
 				String dept = rs.getString("department");
 				String abb = rs.getString("abbreviation");
@@ -171,9 +144,40 @@ public class DBDemo {
 				
 				System.out.println(dept + "\t\t" + abb + " " + courseNo + "\t\t" + courseName);
 			}
+
 			rs.close();
 		} catch(SQLException e) {
 			System.out.println("ERROR: Could not view courses");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void checkGrades(Connection conn, int studentID) {
+		try {
+			String sql = "SELECT abbreviation, courseNo, courseName, grade\r\n" + 
+					"FROM Grade\r\n" + 
+					"JOIN Section ON Grade.sectionID=Section.sectionID\r\n" + 
+					"JOIN Course ON Section.courseID=Course.courseID\r\n" + 
+					"JOIN Department ON Course.deptID=Department.deptID\r\n" + 
+					"WHERE studentID= ?;";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, studentID);
+			ResultSet rs = pstmt.executeQuery();
+			
+			System.out.println("Course Number \t\t Course Name \t\t Grade");
+			
+			while(rs.next()) {
+				String abb = rs.getString("abbreviation");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+				String grade = rs.getString("grade");
+				
+				System.out.println(abb + " " + courseNo + "\t\t" + courseName + "\t\t" + grade);
+			}
+			
+			rs.close();
+		} catch(SQLException e) {
+			System.out.println("ERROR: Could not check grades");
 			e.printStackTrace();
 		}
 	}
