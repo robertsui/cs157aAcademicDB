@@ -155,6 +155,7 @@ public class DBDemo {
 		//archiveProfessor(conn, "2000-10-17"); TO WORK ON LATER
 		
 		enroll(conn, 100004, 10004);
+		//section 10004 student 1000004
 			
 		
 	}
@@ -247,7 +248,7 @@ public class DBDemo {
 			}
 			*/
 			
-			String add = "insert into enrolledIn values (" + studentID + "," + sectionID + ")";
+			String add = "insert into enrolledIn values (" + sectionID + "," + studentID + ")";
 			stmt.executeUpdate(add);
 			System.out.println("Student : " + studentID + " successfully enrolled in course : " + sectionID);
 			
