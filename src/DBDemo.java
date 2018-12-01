@@ -5,6 +5,7 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.sql.ResultSet;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
@@ -103,6 +104,7 @@ public class DBDemo {
 	 * Connect to MySQL and do some stuff.
 	 */
 	
+	@SuppressWarnings("deprecation")
 	public void run() {
 
 		// Connect to MySQL
@@ -148,38 +150,70 @@ public class DBDemo {
 		}
 		*/
 		
+		//search(conn, "course", "courseName", "Introduction"); *WORKS*
+
 		
-		//search for all Introduction courses
-		//search(conn, "course", "courseName", "Introduction");
+		//enroll(conn, 100004, 10004); *WORKS*
 		
-		//archiveProfessor(conn, "2000-10-17"); TO WORK ON LATER
 		
-		enroll(conn, 100004, 10004);
-		//section 10004 student 1000004
-			
+		String pattern = "yyyy-MM-dd";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+		Date cutOffDate = null;
+		try {
+			cutOffDate = simpleDateFormat.parse("2000-10-17");
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//remove archived professors with cutoff date 10/17/2000
+		archiveProfessor(conn, cutOffDate); //CURRENTLY WORKING ON 
 		
 	}
 	
 	
-	/*
-	public void archiveProfessor(Connection con, String cutOffDate) {
+	
+	public void archiveProfessor(Connection con, Date cutOffDate) {
 		Statement stmt = null;
+		Statement archive = null;
+		Statement delete = null;
 		String query = "select * from professor";
 		try {
 			stmt = con.createStatement();
+			
+			archive = con.createStatement();
+			
+			delete = con.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next()) {
 				Date cutOff = rs.getDate("updatedAt");
-				
+				//System.out.println("this is cutoff: " + cutOff.toString());
+				//System.out.println("this is lastUpdatedDate:  " + cutOffDate);
 				if (cutOff.compareTo(cutOffDate) < 0) {
-					String add = "insert into archive values (" + "'"+rs.getString(1)+"'" + "," + "'"+rs.getString(2)+"'" + "," + rs.getInt(3)
-					+ "," + "'"+rs.getString(4)+"'" + "," + rs.getInt(5) + "," + rs.getInt(6) + ")";
-					stmt.executeUpdate(add);
+					String firstName = "\'" + rs.getString("firstName") + "\'";
+					String lastName = "\'" + rs.getString("lastName") + "\'";
+					int dept = rs.getInt("dept");
+					String title = "\'" + rs.getString("title") + "\'";
+					int yearHired = rs.getInt("yearHired");
+					int professorID = rs.getInt("professorID");
+					
+					String add = "insert into archive values (" + professorID + "," + firstName + "," + lastName + "," + dept + "," + title + ","
+								  + yearHired + ")";
+					//System.out.println(add);
+					//return;
+					archive.executeUpdate(add);
+					System.out.println("archived professor with ID : " + professorID);
+					
+					//next two lines undoes our insertion into archive so we can keep testing on archive table
+					//comment the next two lines before submitting
+					//String del = "delete from archive where " + professorID + "=" + professorID;
+					//stmt.executeUpdate(del);
+					
+					//String delProfessor = "delete from professor where professorID = " + professorID;
+					//delete.executeUpdate(delProfessor);
+					
 				}
 				
-				System.out.println(cutOff.getTime());
-				//System.out.println("this is cutoff date " + cutOffDate\));
-				return;
 			}
 		} catch (SQLException e) {
 			System.out.println("ERROR: Could not get table");
@@ -187,7 +221,7 @@ public class DBDemo {
 		}
 		
 	}
-	*/
+	
 	
 	//searches database for any course title containing keyWord
 	public void search(Connection con, String table, String column, String keyWord) {
@@ -226,12 +260,7 @@ public class DBDemo {
 				System.out.println("no student with that ID exists");
 				return;
 			}
-			/*
-			if (!exists(studentID, rs, "studentID")) {
-				System.out.println("enrollment failed, student does not exist");
-				return;
-			}
-			*/
+			
 			rs = stmt.executeQuery(getSection);
 			if (!rs.next()) {
 				System.out.println("no course with that ID exists");
@@ -241,12 +270,6 @@ public class DBDemo {
 				System.out.println("course is full");
 				return;
 			}
-			/*
-			if (!courseHasSpace(sectionID, rs, "sectionID")) {
-				System.out.println("course full");
-				return;
-			}
-			*/
 			
 			String add = "insert into enrolledIn values (" + sectionID + "," + studentID + ")";
 			stmt.executeUpdate(add);
