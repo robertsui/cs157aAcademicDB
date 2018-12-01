@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -150,10 +151,10 @@ public class DBDemo {
 		}
 		*/
 		
-		//search(conn, "course", "courseName", "Introduction"); *WORKS*
+		//search(conn, "course", "courseName", "Introduction"); //*WORKS*
 
 		
-		//enroll(conn, 100004, 10004); *WORKS*
+		//enroll(conn, 100004, 10004); //*WORKS*
 		
 		
 		String pattern = "yyyy-MM-dd";
@@ -167,7 +168,11 @@ public class DBDemo {
 		}
 		
 		//remove archived professors with cutoff date 10/17/2000
-		archiveProfessor(conn, cutOffDate); //CURRENTLY WORKING ON 
+		//archiveProfessor(conn, cutOffDate); //ARCHIVING PART WORKS, NEED TO WORK ON RESTORING
+		
+		
+		//searches for courses that contain either key1 or key2
+		union(conn, "course", "courseName", "courseName", "Biology", "Chemistry"); //*WORKS*
 		
 	}
 	
@@ -176,14 +181,14 @@ public class DBDemo {
 	public void archiveProfessor(Connection con, Date cutOffDate) {
 		Statement stmt = null;
 		Statement archive = null;
-		Statement delete = null;
+		//Statement delete = null;
 		String query = "select * from professor";
 		try {
 			stmt = con.createStatement();
 			
 			archive = con.createStatement();
 			
-			delete = con.createStatement();
+			//delete = con.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next()) {
 				Date cutOff = rs.getDate("updatedAt");
@@ -237,8 +242,8 @@ public class DBDemo {
 				int deptID = rs.getInt("deptID");
 				String courseNo = rs.getString("courseNo");
 				String courseName = rs.getString("courseName");
-				System.out.println("courseId : " + courseID + " deptId " + deptID + " courseNo : "
-								   + courseNo + " courseName " + courseName);
+				System.out.println("courseId: " + courseID + ", deptId: " + deptID + ", courseNo: "
+						   + courseNo + ", courseName:" + courseName);
 			}
 			
 			rs.close();
@@ -282,7 +287,83 @@ public class DBDemo {
 		}
 				
 	}
+	public void union(Connection con, String table, String firstColumn, String secondColumn, String firstKey, String secondKey) {
+		Statement s1 = null;
+		final String UNION = "union";
+		String q1 = "select * from " + table + " WHERE " + firstColumn + " LIKE " + "\'%"+ firstKey + "%\'";
+		String q2 = "select * from " + table + " WHERE " + secondColumn + " LIKE " + "\'%"+ secondKey + "%\'";
+		
+		try {
+			s1 = con.createStatement();
+			//System.out.println(q1 + UNION + q2);
+			ResultSet rs = s1.executeQuery(q1 + " " + UNION + " "+ q2);
+			
+			while (rs.next()) {
+				int courseID = rs.getInt("courseID");
+				int deptID = rs.getInt("deptID");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+				System.out.println("courseId: " + courseID + ", deptId: " + deptID + ", courseNo: "
+								   + courseNo + ", courseName:" + courseName);
+			}
+		} catch (SQLException e) {
+			System.out.println("Failed to retrieve data");
+			e.printStackTrace();
+		}
+	}
+	/*
+	public static void viewCoursesByProf(Connection conn, int profID) {
+        try {
+            String viewCoursesByProf =
+                    "SELECT c.courseName, t.professorID, c.courseNo, s.sectionID, p.firstName, p.lastName," +
+                            " d.abbreviation \r\n" +
+                            "FROM Section s\r\n" +
+                            "JOIN Professor p\r\n" +
+                            "JOIN Department d\r\n" +
+                            "JOIN Teaches t ON s.sectionID=t.sectionID\r\n" +
+                            "JOIN Course c ON s.courseID=c.courseID\r\n" +
+                            "WHERE t.professorID= ? AND p.professorID=? AND d.deptID=p.dept;";
+            PreparedStatement pstmt = conn.prepareStatement(viewCoursesByProf);
+            pstmt.setInt(1, profID);
+            pstmt.setInt(2, profID);
+            ResultSet rs = pstmt.executeQuery();
+
+            // TODO: make result format pretty
+            System.out.println("Retrieving all course offerings by Professor " + profID + "...");
+
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.format("%-8s %-14s %-14s %-14s %-14s %-14s",
+                    "ID No.", "Last Name", "First Name", "Section ID", "Course", "Course Title");
+            System.out.println();
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            while(rs.next()) {
+                String profIDNo = rs.getString("professorID");
+                String profFN = rs.getString("firstName");
+                String profLN = rs.getString("lastName");
+                String secIDNo = rs.getString("sectionID");
+                String courseNo = rs.getString("courseNo");
+                String courseName = rs.getString("courseName");
+                String deptAbb = rs.getString("abbreviation");
+
+                System.out.format("%-8s %-14s %-14s %-14s %-1s %-9s %-1s",
+                        profIDNo, profLN, profFN, secIDNo, deptAbb, courseNo, courseName);
+                System.out.println();
+            }
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Done.\n");
+            rs.close();
+        } catch(SQLException e) {
+            System.out.println("ERROR: Could not view courses");
+            e.printStackTrace();
+        }
+    }
+    */
 	
+	
+	/*
 	private boolean courseHasSpace(int courseID, ResultSet rs, String string) {
 		try {
 			while (rs.next()) {
@@ -302,6 +383,7 @@ public class DBDemo {
 		}
 		return false;
 	}
+	*/
 
 	public boolean exists(int studentID, ResultSet rs, String column) {
 		try {
