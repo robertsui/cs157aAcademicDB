@@ -1,10 +1,13 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.sql.ResultSet;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Calendar;
 
 /**
  * This class demonstrates how to connect to MySQL and run some basic commands.
@@ -44,13 +47,13 @@ public class DBDemo {
 	private final String userName = "root";
 
 	/** The password for the MySQL account (or empty for anonymous) */
-	private final String password = "myroot";
+	private final String password = "sjsusql2!";
 
 	/** The name of the computer running MySQL */
 	private final String serverName = "localhost";
 
 	/** The port of the MySQL server (default is 3306) */
-	private final int portNumber = 3308;
+	private final int portNumber = 3306;
 
 	/** The name of the database we are testing with (this default is installed with MySQL) */
 	private final String dbName = "academic_records";
@@ -99,6 +102,7 @@ public class DBDemo {
 	/**
 	 * Connect to MySQL and do some stuff.
 	 */
+	
 	public void run() {
 
 		// Connect to MySQL
@@ -106,81 +110,193 @@ public class DBDemo {
 		try {
 			conn = this.getConnection();
 			System.out.println("Connected to database");
-			viewCourses(conn);
-			System.out.println("-------------------------------------------------------");
-			checkGrades(conn, 100017);
 		} catch (SQLException e) {
-//			System.out.println("ERROR: Could not connect to the database");
+			System.out.println("ERROR: Could not connect to the database");
 			e.printStackTrace();
-//			return;
-		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				e.printStackTrace();
-			}
+			return;
 		}
-	}
-	
-	private static void viewCourses(Connection conn) {
-		try {
-			String viewCourses = 
-					"SELECT d.name AS department, d.abbreviation, c.courseNo, c.courseName " + 
-					"FROM Course c, Department d " + 
-					"WHERE c.deptID=d.deptID " + 
-					"ORDER BY d.name, c.courseNo ASC";
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(viewCourses);
-			
-			// TODO: make result format pretty
-			System.out.println("Department \t\t Course Number \t\t Course Name");
-			while(rs.next()) {
-				String dept = rs.getString("department");
-				String abb = rs.getString("abbreviation");
-				String courseNo = rs.getString("courseNo");
-				String courseName = rs.getString("courseName");
-				
-				System.out.println(dept + "\t\t" + abb + " " + courseNo + "\t\t" + courseName);
-			}
 
+		// Create a table
+		/*
+		try {
+		    String createString =
+			        "CREATE TABLE " + this.tableName + " ( " +
+			        "ID INTEGER NOT NULL, " +
+			        "NAME varchar(40) NOT NULL, " +
+			        "STREET varchar(40) NOT NULL, " +
+			        "CITY varchar(20) NOT NULL, " +
+			        "STATE char(2) NOT NULL, " +
+			        "ZIP char(5), " +
+			        "PRIMARY KEY (ID))";
+			this.executeUpdate(conn, createString);
+			System.out.println("Created a table");
+	    } catch (SQLException e) {
+			System.out.println("ERROR: Could not create the table");
+			e.printStackTrace();
+			return;
+		}
+		
+		// Drop the table
+		try {
+		    String dropString = "DROP TABLE " + this.tableName;
+			this.executeUpdate(conn, dropString);
+			System.out.println("Dropped the table");
+	    } catch (SQLException e) {
+			System.out.println("ERROR: Could not drop the table");
+			e.printStackTrace();
+			return;
+		}
+		*/
+		
+		
+		//search for all Introduction courses
+		//search(conn, "course", "courseName", "Introduction");
+		
+		//archiveProfessor(conn, "2000-10-17"); TO WORK ON LATER
+		
+		enroll(conn, 100004, 10004);
+			
+		
+	}
+	
+	
+	/*
+	public void archiveProfessor(Connection con, String cutOffDate) {
+		Statement stmt = null;
+		String query = "select * from professor";
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				Date cutOff = rs.getDate("updatedAt");
+				
+				if (cutOff.compareTo(cutOffDate) < 0) {
+					String add = "insert into archive values (" + "'"+rs.getString(1)+"'" + "," + "'"+rs.getString(2)+"'" + "," + rs.getInt(3)
+					+ "," + "'"+rs.getString(4)+"'" + "," + rs.getInt(5) + "," + rs.getInt(6) + ")";
+					stmt.executeUpdate(add);
+				}
+				
+				System.out.println(cutOff.getTime());
+				//System.out.println("this is cutoff date " + cutOffDate\));
+				return;
+			}
+		} catch (SQLException e) {
+			System.out.println("ERROR: Could not get table");
+			e.printStackTrace();
+		}
+		
+	}
+	*/
+	
+	//searches database for any course title containing keyWord
+	public void search(Connection con, String table, String column, String keyWord) {
+		
+		Statement stmt = null;
+		String query = "select * from " + table + " WHERE " + column + " LIKE " + "\'%"+ keyWord + "%\'"; 
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			
+			while (rs.next()) {
+				int courseID = rs.getInt("courseID");
+				int deptID = rs.getInt("deptID");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+				System.out.println("courseId : " + courseID + " deptId " + deptID + " courseNo : "
+								   + courseNo + " courseName " + courseName);
+			}
+			
 			rs.close();
-		} catch(SQLException e) {
-			System.out.println("ERROR: Could not view courses");
+		} catch (SQLException e) {
+			System.out.println("Could not return courses");
 			e.printStackTrace();
 		}
 	}
 	
-	private static void checkGrades(Connection conn, int studentID) {
+	public void enroll(Connection con, int studentID, int sectionID) {
+		//first check to see if studentID is valid
+		Statement stmt = null;
+		String getStudents = "select * from student where studentID = " + studentID;
+		String getSection = "select * from section where sectionID = " + sectionID;
 		try {
-			String sql = "SELECT abbreviation, courseNo, courseName, grade\r\n" + 
-					"FROM Grade\r\n" + 
-					"JOIN Section ON Grade.sectionID=Section.sectionID\r\n" + 
-					"JOIN Course ON Section.courseID=Course.courseID\r\n" + 
-					"JOIN Department ON Course.deptID=Department.deptID\r\n" + 
-					"WHERE studentID= ?;";
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, studentID);
-			ResultSet rs = pstmt.executeQuery();
-			
-			System.out.println("Course Number \t\t Course Name \t\t Grade");
-			
-			while(rs.next()) {
-				String abb = rs.getString("abbreviation");
-				String courseNo = rs.getString("courseNo");
-				String courseName = rs.getString("courseName");
-				String grade = rs.getString("grade");
-				
-				System.out.println(abb + " " + courseNo + "\t\t" + courseName + "\t\t" + grade);
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(getStudents);
+			if (!rs.next()) {
+				System.out.println("no student with that ID exists");
+				return;
 			}
+			/*
+			if (!exists(studentID, rs, "studentID")) {
+				System.out.println("enrollment failed, student does not exist");
+				return;
+			}
+			*/
+			rs = stmt.executeQuery(getSection);
+			if (!rs.next()) {
+				System.out.println("no course with that ID exists");
+				return;
+			}
+			if (rs.getInt("capacity") <= rs.getInt("enrolled")) {
+				System.out.println("course is full");
+				return;
+			}
+			/*
+			if (!courseHasSpace(sectionID, rs, "sectionID")) {
+				System.out.println("course full");
+				return;
+			}
+			*/
 			
-			rs.close();
-		} catch(SQLException e) {
-			System.out.println("ERROR: Could not check grades");
+			String add = "insert into enrolledIn values (" + studentID + "," + sectionID + ")";
+			stmt.executeUpdate(add);
+			System.out.println("Student : " + studentID + " successfully enrolled in course : " + sectionID);
+			
+			
+		} catch (SQLException e) {
+			System.out.println("Student does not exist");
 			e.printStackTrace();
 		}
+				
 	}
+	
+	private boolean courseHasSpace(int courseID, ResultSet rs, String string) {
+		try {
+			while (rs.next()) {
+				if (rs.getInt("courseID") == courseID) {
+					if (rs.getInt("capacity") > rs.getInt("enrolled")) {
+						//System.out.println(courseID);
+						//System.out.println("capacity : " + rs.getInt("capacity" ) + " enrolled :" + rs.getInt("enrolled"));
+						return true;
+					} else {
+						System.out.println("Course does not exist or course is full");
+						return false;
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean exists(int studentID, ResultSet rs, String column) {
+		try {
+			while (rs.next()) {
+				if (rs.getInt(column) == studentID) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	//public boolean isFull
+	
+	
+	
 	
 	/**
 	 * Connect to the DB and do some stuff
@@ -189,5 +305,4 @@ public class DBDemo {
 		DBDemo app = new DBDemo();
 		app.run();
 	}
-
 }
